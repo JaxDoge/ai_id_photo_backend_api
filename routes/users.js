@@ -4,9 +4,12 @@ import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { uploadToS3 } from '../utils/s3Upload.js';
+import multer from "multer";
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const upload = multer();
 
 // register a new user
 router.post("/signup", async (req, res) => {
@@ -150,6 +153,44 @@ router.post("/google-signin", async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Google sign-in failed", error });
+  }
+});
+
+// ONLY FOR TEST, TODO: need to modify the actual logic later
+router.post("/test-upload", upload.single("photo"), async (req, res) => {
+  const userId = req.body.userId;
+  const file = req.file;
+
+  if (!file || !userId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "File and userId are required" });
+  }
+
+  try {
+    // Upload to S3
+    const s3Url = await uploadToS3(file.buffer, userId);
+
+    // Add the image URL to the user's historyPhotos array in MongoDB
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Append the new photo to the historyPhotos array
+    user.historyPhotos.push({ url: s3Url });
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Photo uploaded and saved to user history",
+      s3Url,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error uploading photo" });
   }
 });
 
