@@ -4,11 +4,15 @@ const userSchema = new Schema(
   {
     firstName: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.isGoogleUser;
+      },
     },
     lastName: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.isGoogleUser;
+      },
     },
     email: {
       type: String,
@@ -17,7 +21,13 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.isGoogleUser;
+      },
+    },
+    isGoogleUser: {
+      type: Boolean,
+      default: false, // Flag to identify Google sign-in users
     },
     gender: {
       type: String,

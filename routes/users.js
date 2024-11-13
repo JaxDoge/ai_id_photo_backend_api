@@ -1,9 +1,12 @@
 import express from "express";
 import User from "../models/User.js";
-const router = express.Router();
+import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+
+const router = express.Router();
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // register a new user
 router.post("/signup", async (req, res) => {
@@ -99,6 +102,54 @@ router.get("/get-logged-in-user", authMiddleware, async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+});
+
+// google sign in
+router.post("/google-signin", async (req, res) => {
+  const { idToken } = req.body;
+
+  try {
+    // Verify Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name } = payload;
+
+    // Check if user already exists in the database
+    let user = await User.findOne({ email });
+    if (!user) {
+      // If user does not exist, create a new user
+      user = new User({
+        googleId,
+        email,
+        firstName: name ? name.split(" ")[0] : "", // Set first name from Google name
+        lastName: name ? name.split(" ")[1] : "", // Set last name from Google name
+        isGoogleUser: true,
+      });
+      await user
+        .save()
+        .then(() => console.log("New Google user saved to database."))
+        .catch((error) =>
+          console.error("Error saving new Google user:", error)
+        );
+    } else {
+      console.log("Existing user found in database.");
+    }
+
+    // Generate JWT token for our backend
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    res.status(200).json({ success: true, token, user });
+  } catch (error) {
+    console.error("Google sign-in error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Google sign-in failed", error });
   }
 });
 
