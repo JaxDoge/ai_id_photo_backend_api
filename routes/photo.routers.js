@@ -17,10 +17,7 @@ router.post('/process', upload.single('image'), async (req, res) => {
       params.width = dimensions.width;
     }
     
-    const result = await processIdPhoto({
-      image: req.file,
-      ...params
-    });
+    const result = await processIdPhoto(req.file, params);
     
     res.json({
       success: true,

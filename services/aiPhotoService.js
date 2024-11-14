@@ -7,7 +7,7 @@ dotenv.config();
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL;
 const AI_SERVICE_PORT = process.env.AI_SERVICE_PORT;
 
-export async function processIdPhoto({ image, ...params }) {
+export async function processIdPhoto(image, params) {
   try {
     const formData = new FormData();
 
