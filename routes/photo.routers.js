@@ -18,6 +18,7 @@ router.post('/process', upload.single('image'), async (req, res) => {
     }
     
     const result = await processIdPhoto(req.file, params);
+    console.log('Photo processed successfully');
     
     res.json({
       success: true,

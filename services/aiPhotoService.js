@@ -1,6 +1,7 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import FormData from 'form-data';
+import axiosRetry from 'axios-retry';
 
 dotenv.config();
 
@@ -8,6 +9,18 @@ const AI_SERVICE_URL = process.env.AI_SERVICE_URL;
 const AI_SERVICE_PORT = process.env.AI_SERVICE_PORT;
 
 export async function processIdPhoto(image, params) {
+    // Configure retry behavior
+    axiosRetry(axios, { 
+        retries: 3,
+        retryDelay: axiosRetry.exponentialDelay,
+        retryCondition: (error) => {
+            // Retry on timeout errors and network errors
+            return axiosRetry.isNetworkOrIdempotentRequestError(error) || 
+                    error.code === 'ETIMEDOUT';
+        },
+        shouldResetTimeout: true
+    });
+
     // Rename keys in params if they exist
     const renamedParams = {
         ...params,
@@ -76,6 +89,8 @@ async function processCallIdphoto(image, params) {
             });
     
     
+
+
         const response = await axios({
           method: 'post',
           url: `http://${AI_SERVICE_URL}:${AI_SERVICE_PORT}/idphoto`,
@@ -83,7 +98,12 @@ async function processCallIdphoto(image, params) {
           headers: {
             ...formData.getHeaders(),
           },
+          timeout: 120000,
         });
+
+        if (response.data.status === false) {
+            throw new Error('Ai service returned false');
+        }
     
         return response.data.image_base64_hd;
       } catch (error) {
@@ -93,36 +113,46 @@ async function processCallIdphoto(image, params) {
 }
 
 async function processCallAddBackground(image_no_background_base64_hd, params) {
-    const formData = new FormData();
+    try {
+        const formData = new FormData();
 
-    formData.append('input_image_base64', image_no_background_base64_hd);
+        formData.append('input_image_base64', image_no_background_base64_hd);
 
-    const defaultParams = {
-        dpi: 300,
-    };
+        const defaultParams = {
+            dpi: 300,
+        };
 
-    const finalParams = { ...defaultParams, ...params };
+        const finalParams = { ...defaultParams, ...params };
 
-    const requiredParams = [
-        'color',
-        'dpi',
-        'render',
-    ];
+        const requiredParams = [
+            'color',
+            'dpi',
+            'render',
+        ];
 
-    Object.entries(finalParams)
-        .filter(([key]) => requiredParams.includes(key))
-        .forEach(([key, value]) => {
-        formData.append(key, value);
-    });
+        Object.entries(finalParams)
+            .filter(([key]) => requiredParams.includes(key))
+            .forEach(([key, value]) => {
+                formData.append(key, value);
+            });
 
-    const response = await axios({
-        method: 'post',
-        url: `http://${AI_SERVICE_URL}:${AI_SERVICE_PORT}/add_background`,
-        data: formData,
-        headers: {
-          ...formData.getHeaders(),
-        },
-      });
+        const response = await axios({
+            method: 'post',
+            url: `http://${AI_SERVICE_URL}:${AI_SERVICE_PORT}/add_background`,
+            data: formData,
+            headers: {
+                ...formData.getHeaders(),
+            },
+            timeout: 120000,
+        });
+
+        if (response.data.status === false) {
+            throw new Error('Ai service returned false');
+        }
   
-      return response.data
+        return response.data
+    } catch (error) {
+        console.error('Error adding background:', error);
+        throw error;
+    }
 }
