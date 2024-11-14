@@ -17,8 +17,12 @@ export async function processIdPhoto(image, params) {
     // Remove old keys
     delete renamedParams.renderMode;
     delete renamedParams.backgroundColor;
+    delete renamedParams.sizeType;
+    delete renamedParams.presetSize;
 
+    console.log('Getting image without background...');
     const image_no_background_base64_hd = await processCallIdphoto(image, renamedParams);
+    console.log('Adding background...');
     return await processCallAddBackground(image_no_background_base64_hd, renamedParams);
 }
 
