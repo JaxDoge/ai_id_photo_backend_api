@@ -1,5 +1,4 @@
 import axios from 'axios';
-import FormData from 'form-data';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -7,14 +6,9 @@ dotenv.config();
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL;
 const AI_SERVICE_PORT = process.env.AI_SERVICE_PORT;
 
-export async function processIdPhoto(imageFile, options = {}) {
+export async function processIdPhoto(formData) {
   try {
-    const formData = new FormData();
-    
-    // Add the image file directly to form data
-    formData.append('input_image', imageFile);
-
-    // Add all parameters to form data
+    // Add default parameters if they're not present in formData
     const defaultParams = {
       head_measure_ratio: 0.2,
       head_height_ratio: 0.45,
@@ -29,12 +23,11 @@ export async function processIdPhoto(imageFile, options = {}) {
       face_alignment: true,
     };
 
-    // Merge default parameters with provided options
-    const finalParams = { ...defaultParams, ...options };
-
-    // Add all parameters to form data
-    Object.entries(finalParams).forEach(([key, value]) => {
-      formData.append(key, value);
+    // Add any missing default parameters to formData
+    Object.entries(defaultParams).forEach(([key, value]) => {
+      if (!formData.has(key)) {
+        formData.append(key, value);
+      }
     });
 
     const response = await axios({
