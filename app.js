@@ -9,6 +9,7 @@ import cors from 'cors';
 
 import indexRouter from './routes/index.js';
 import usersRouter from './routes/users.js';
+import photoRoutes from './routes/photo.routers.js';
 
 // Define __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +35,7 @@ app.use(express.static(join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/photo', photoRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
