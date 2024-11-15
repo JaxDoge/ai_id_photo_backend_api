@@ -8,14 +8,7 @@ const upload = multer();
 
 router.post('/process', upload.single('image'), async (req, res) => {
   try {
-    
     const params = JSON.parse(req.body.params);
-
-    if (params.sizeType === 'only change background') {
-      const dimensions = sizeOf(req.file.buffer);
-      params.height = dimensions.height;
-      params.width = dimensions.width;
-    }
     
     const result = await processIdPhoto(req.file, params);
     console.log('Photo processed successfully');
