@@ -76,6 +76,7 @@ router.post("/signin", async (req, res) => {
       success: true,
       message: "Login successful",
       data: token,
+      user_id: user._id,
     });
   } catch (error) {
     return res.send({
@@ -147,7 +148,7 @@ router.post("/google-signin", async (req, res) => {
       expiresIn: "1d",
     });
 
-    res.status(200).json({ success: true, token, user });
+    res.status(200).json({ success: true, token, userId: user._id });
   } catch (error) {
     console.error("Google sign-in error:", error);
     res
@@ -191,6 +192,20 @@ router.post("/test-upload", upload.single("photo"), async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Error uploading photo" });
+  }
+});
+
+// Get user's photo history
+router.get("/get-photo-history", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    return res.status(200).json({ success: true, data: user.historyPhotos });
+  } catch (error) {
+    console.error("Error fetching photo history:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch photo history" });
   }
 });
 
