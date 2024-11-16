@@ -2,13 +2,13 @@ import s3 from "../config/aws.js";
 
 export const uploadToS3 = async (fileBuffer, userId) => {
   const timestamp = Date.now();
-  const fileName = `${userId}-id-photo-${timestamp}.jpeg`;
+  const fileName = `${userId}-id-photo-${timestamp}.png`;
 
   const params = {
     Bucket: process.env.S3_BUCKET_NAME,
     Key: fileName,
     Body: fileBuffer,
-    ContentType: "image/jpeg",
+    ContentType: "image/png",
   };
 
   try {
