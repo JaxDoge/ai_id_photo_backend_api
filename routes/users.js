@@ -209,4 +209,26 @@ router.get("/get-photo-history", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/get-single-photo", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.user.userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    const photo = user.historyPhotos.find(
+      (photo) => photo._id.toString() === req.query.photoId
+    );
+    if (!photo) {
+      return res.status(404).json({ success: false, message: "Photo not found" });
+    }
+    return res.status(200).json({ success: true, data: photo });
+  } catch (error) {
+    console.error("Error fetching photo:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch photo" });
+  }
+});
+
+
+
+
 export default router;
