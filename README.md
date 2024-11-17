@@ -28,3 +28,13 @@ nodemon server.js
 1. (Optional) Access the Server If you'd like to check that the server is running, open http://localhost:4000 in your browser or use a tool like Postman to test specific endpoints.
 
 ````
+
+1. Reinstall node-fetch if encounter Error like ("response.body.pipe is not a function")
+- Downgrade node-fetch to version 2.x
+
+```bash
+npm uninstall node-fetch
+```
+```bash
+npm install node-fetch@2
+```

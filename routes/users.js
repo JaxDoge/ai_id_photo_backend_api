@@ -11,6 +11,7 @@ const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const upload = multer();
 
+
 // register a new user
 router.post("/signup", async (req, res) => {
   try {
@@ -195,6 +196,20 @@ router.post("/test-upload", upload.single("photo"), async (req, res) => {
   }
 });
 
+// TESTING USE: Generate a JWT token for a user
+// router.post("/generate-token", (req, res) => {
+//   console.log("Received request on /generate-token"); // Log the request
+//   const { userId } = req.body;
+
+//   if (!userId) {
+//     return res.status(400).json({ success: false, message: "User ID is required" });
+//   }
+
+//   const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1d" });
+//   res.json({ success: true, token });
+// });
+
+
 // Get user's photo history
 router.get("/get-photo-history", authMiddleware, async (req, res) => {
   try {
@@ -209,6 +224,7 @@ router.get("/get-photo-history", authMiddleware, async (req, res) => {
   }
 });
 
+// Get a single photo by ID
 router.get("/get-single-photo", authMiddleware, async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.user.userId });
@@ -227,8 +243,6 @@ router.get("/get-single-photo", authMiddleware, async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch photo" });
   }
 });
-
-
 
 
 export default router;
