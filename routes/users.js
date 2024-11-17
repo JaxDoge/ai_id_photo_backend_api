@@ -158,44 +158,6 @@ router.post("/google-signin", async (req, res) => {
   }
 });
 
-// ONLY FOR TEST, TODO: need to modify the actual logic later
-router.post("/test-upload", upload.single("photo"), async (req, res) => {
-  const userId = req.body.userId;
-  const file = req.file;
-
-  if (!file || !userId) {
-    return res
-      .status(400)
-      .json({ success: false, message: "File and userId are required" });
-  }
-
-  try {
-    // Upload to S3
-    const s3Url = await uploadToS3(file.buffer, userId);
-
-    // Add the image URL to the user's historyPhotos array in MongoDB
-    const user = await User.findById(userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    // Append the new photo to the historyPhotos array
-    user.historyPhotos.push({ url: s3Url });
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Photo uploaded and saved to user history",
-      s3Url,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Error uploading photo" });
-  }
-});
-
 // TESTING USE: Generate a JWT token for a user
 // router.post("/generate-token", (req, res) => {
 //   console.log("Received request on /generate-token"); // Log the request
