@@ -209,4 +209,28 @@ router.get("/get-photo-history", authMiddleware, async (req, res) => {
   }
 });
 
+
+
+// Update user details
+router.put("/update", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const updates = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).send({ success: false, message: "User not found" });
+    }
+
+    res.send({ success: true, data: updatedUser });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).send({ success: false, message: "Error updating user" });
+  }
+});
+
+
+
+
 export default router;
