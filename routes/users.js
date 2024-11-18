@@ -11,6 +11,7 @@ const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const upload = multer();
 
+
 // register a new user
 router.post("/signup", async (req, res) => {
   try {
@@ -157,43 +158,19 @@ router.post("/google-signin", async (req, res) => {
   }
 });
 
-// ONLY FOR TEST, TODO: need to modify the actual logic later
-router.post("/test-upload", upload.single("photo"), async (req, res) => {
-  const userId = req.body.userId;
-  const file = req.file;
+// TESTING USE: Generate a JWT token for a user
+// router.post("/generate-token", (req, res) => {
+//   console.log("Received request on /generate-token"); // Log the request
+//   const { userId } = req.body;
 
-  if (!file || !userId) {
-    return res
-      .status(400)
-      .json({ success: false, message: "File and userId are required" });
-  }
+//   if (!userId) {
+//     return res.status(400).json({ success: false, message: "User ID is required" });
+//   }
 
-  try {
-    // Upload to S3
-    const s3Url = await uploadToS3(file.buffer, userId);
+//   const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1d" });
+//   res.json({ success: true, token });
+// });
 
-    // Add the image URL to the user's historyPhotos array in MongoDB
-    const user = await User.findById(userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    // Append the new photo to the historyPhotos array
-    user.historyPhotos.push({ url: s3Url });
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Photo uploaded and saved to user history",
-      s3Url,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Error uploading photo" });
-  }
-});
 
 // Get user's photo history
 router.get("/get-photo-history", authMiddleware, async (req, res) => {
@@ -206,6 +183,26 @@ router.get("/get-photo-history", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error fetching photo history:", error);
     res.status(500).json({ success: false, message: "Failed to fetch photo history" });
+  }
+});
+
+// Get a single photo by ID
+router.get("/get-single-photo", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.user.userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    const photo = user.historyPhotos.find(
+      (photo) => photo._id.toString() === req.query.photoId
+    );
+    if (!photo) {
+      return res.status(404).json({ success: false, message: "Photo not found" });
+    }
+    return res.status(200).json({ success: true, data: photo });
+  } catch (error) {
+    console.error("Error fetching photo:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch photo" });
   }
 });
 
@@ -229,7 +226,6 @@ router.put("/update", authMiddleware, async (req, res) => {
     res.status(500).send({ success: false, message: "Error updating user" });
   }
 });
-
 
 
 

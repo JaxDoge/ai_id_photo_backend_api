@@ -92,7 +92,7 @@ async function processCallHumanMatting(image, params) {
             headers: {
                 ...formData.getHeaders(),
             },
-            timeout: 120000,
+            timeout: 60000,
         });
       
         if (response.data.status === false) {
@@ -162,7 +162,7 @@ async function processCallIdphoto(image, params) {
           headers: {
             ...formData.getHeaders(),
           },
-          timeout: 120000,
+          timeout: 60000,
         });
 
         if (response.data.status === false) {

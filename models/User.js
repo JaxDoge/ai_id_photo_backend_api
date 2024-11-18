@@ -40,7 +40,7 @@ const userSchema = new Schema(
     },
     avatar: {
       type: String, // URL or path to the avatar image
-      default: "/images/avatar-default.png",
+      default: null,
     },
     historyPhotos: {
       type: [
