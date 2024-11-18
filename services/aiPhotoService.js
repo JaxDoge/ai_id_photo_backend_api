@@ -10,11 +10,12 @@ const AI_SERVICE_URL = process.env.AI_SERVICE_URL;
 const AI_SERVICE_PORT = process.env.AI_SERVICE_PORT;
 
 const ONLY_CHANGE_BACKGROUND = 'only change background';
+const TIMEOUT_MS = 60000;
 
 export async function processIdPhoto(image, params) {
     // Configure retry behavior
     axiosRetry(axios, { 
-        retries: 3,
+        retries: 2,
         retryDelay: axiosRetry.exponentialDelay,
         retryCondition: (error) => {
             // Retry on timeout errors and network errors
@@ -92,7 +93,7 @@ async function processCallHumanMatting(image, params) {
             headers: {
                 ...formData.getHeaders(),
             },
-            timeout: 60000,
+            timeout: TIMEOUT_MS,
         });
       
         if (response.data.status === false) {
@@ -162,7 +163,7 @@ async function processCallIdphoto(image, params) {
           headers: {
             ...formData.getHeaders(),
           },
-          timeout: 60000,
+          timeout: TIMEOUT_MS,
         });
 
         if (response.data.status === false) {
@@ -207,7 +208,7 @@ async function processCallAddBackground(image_no_background_base64, params) {
             headers: {
                 ...formData.getHeaders(),
             },
-            timeout: 120000,
+            timeout: TIMEOUT_MS,
         });
 
         if (response.data.status === false) {
