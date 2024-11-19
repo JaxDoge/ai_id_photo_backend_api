@@ -9,6 +9,16 @@ const upload = multer();
 
 router.post('/process', upload.single('image'), async (req, res) => {
   try {
+    if (!req.file) {
+      throw new Error('No image file uploaded');
+    }
+    if (!req.body.params) {
+      throw new Error('Missing params parameter');
+    }
+    if (!req.body.user_id) {
+      throw new Error('Missing user_id parameter');
+    }
+
     const params = JSON.parse(req.body.params);
     const user_id = req.body.user_id;
     
