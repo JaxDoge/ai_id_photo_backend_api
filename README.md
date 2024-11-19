@@ -30,11 +30,14 @@ nodemon server.js
 ````
 
 1. Reinstall node-fetch if encounter Error like ("response.body.pipe is not a function")
+
 - Downgrade node-fetch to version 2.x
 
 ```bash
 npm uninstall node-fetch
+
 ```
+
 ```bash
 npm install node-fetch@2
 ```
