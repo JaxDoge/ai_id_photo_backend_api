@@ -41,3 +41,8 @@ npm uninstall node-fetch
 ```bash
 npm install node-fetch@2
 ```
+
+1. Setup for DB Testing
+```
+npm install --save-dev jest
+```

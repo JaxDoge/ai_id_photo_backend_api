@@ -16,6 +16,5 @@ export function authMiddleware(req, res, next) {
   }
 }
 
-module.exports = {
-  testMatch: ["**/tests/**/*.test.js", "**/?(*.)+(spec|test).[tj]s?(x)"],
-};
+
+export const testMatch = ["**/tests/**/*.test.js", "**/?(*.)+(spec|test).[tj]s?(x)"];

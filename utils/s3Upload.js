@@ -20,7 +20,5 @@ export const uploadToS3 = async (fileBuffer, userId) => {
   }
 };
 
-export default {
-  transform: {},
-  testEnvironment: "node",
-};
+
+export const testMatch = ["**/tests/**/*.test.js", "**/?(*.)+(spec|test).[tj]s?(x)"];
