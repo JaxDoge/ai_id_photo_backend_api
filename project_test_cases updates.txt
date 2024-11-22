@@ -48,7 +48,7 @@ This file contains test cases designed for the various components of the project
 
 ---
 
-## 3. Database Test Cases
+## 2. Database Test Cases
 ###  MongoDB
 **Test Case 1**: Validate the creation of a new user.
 - **Steps**:
@@ -64,7 +64,7 @@ This file contains test cases designed for the various components of the project
 
 ---
 
-## 5. Unit Testing (Jest for JavaScript)
+## 3. Unit Testing (Jest for JavaScript)
 ###  Backend Functions
 **Test Case 1**: Test S3 upload functionality.
 - **Function**: `uploadToS3(fileBuffer, userId)`
@@ -83,7 +83,7 @@ This file contains test cases designed for the various components of the project
 
 ---
 
-## 6. End-to-End Testing
+## 4. End-to-End Testing
 **Test Case 1**: Verify the entire signup and profile update flow.
 - **Steps**:
   1. Register a new user through /users/signup.
