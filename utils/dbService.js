@@ -29,3 +29,7 @@ async function saveResultToDatabase(userId, fileUrl) {
 }
 
 export { saveResultToDatabase };
+
+module.exports = {
+    testMatch: ["**/tests/**/*.test.js", "**/?(*.)+(spec|test).[tj]s?(x)"],
+  };

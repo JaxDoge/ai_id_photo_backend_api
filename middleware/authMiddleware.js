@@ -15,3 +15,7 @@ export function authMiddleware(req, res, next) {
     res.status(401).json({ message: "Token is not valid" });
   }
 }
+
+module.exports = {
+  testMatch: ["**/tests/**/*.test.js", "**/?(*.)+(spec|test).[tj]s?(x)"],
+};

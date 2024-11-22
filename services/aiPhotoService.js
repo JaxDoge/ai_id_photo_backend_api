@@ -221,3 +221,7 @@ async function processCallAddBackground(image_no_background_base64, params) {
         throw error;
     }
 }
+
+module.exports = {
+    testMatch: ["**/tests/**/*.test.js", "**/?(*.)+(spec|test).[tj]s?(x)"],
+  };

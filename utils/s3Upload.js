@@ -19,3 +19,8 @@ export const uploadToS3 = async (fileBuffer, userId) => {
     throw new Error("Failed to upload image to S3");
   }
 };
+
+export default {
+  transform: {},
+  testEnvironment: "node",
+};
