@@ -30,22 +30,6 @@ This file contains test cases designed for the various components of the project
 
 ---
 
-## 2. Backend API Test Cases
-### a) User Authentication
-**Test Case 1**: Validate the signin endpoint.
-- **Endpoint**: POST /users/signin
-- **Steps**:
-  1. Send a valid email and password in the request body.
-  2. Check the response for a success message and a valid JWT token.
-- **Expected Result**: The response should contain a `success: true` and a `data` field with the token.
-
-**Test Case 2**: Validate the update endpoint.
-- **Endpoint**: PUT /users/update
-- **Steps**:
-  1. Authenticate the user by sending a valid JWT in the Authorization header.
-  2. Send updated user data in the request body.
-- **Expected Result**: The user data is updated in the database and reflected in the response.
-
 ### b) AWS S3 Uploads
 **Test Case 1**: Validate the upload to S3 functionality.
 - **Endpoint**: Utility Function `uploadToS3`
@@ -65,7 +49,7 @@ This file contains test cases designed for the various components of the project
 ---
 
 ## 3. Database Test Cases
-### a) MongoDB
+###  MongoDB
 **Test Case 1**: Validate the creation of a new user.
 - **Steps**:
   1. Send a POST request to /users/signup with valid user details.
@@ -80,41 +64,9 @@ This file contains test cases designed for the various components of the project
 
 ---
 
-## 4. Machine Learning (ML) Test Cases
-### a) Model Testing
-**Test Case 1**: Validate the model prediction accuracy.
-- **Steps**:
-  1. Load the trained model.
-  2. Provide test input data.
-  3. Verify that the output predictions match the expected results.
-- **Expected Result**: The prediction accuracy meets the project requirements (e.g., >= 90%).
-
-**Test Case 2**: Test the model endpoint.
-- **Endpoint**: POST /model/predict
-- **Steps**:
-  1. Send valid input data in the request body.
-  2. Check the response for prediction output.
-- **Expected Result**: The response contains valid predictions with no errors.
-
----
-
 ## 5. Unit Testing (Jest for JavaScript)
-### a) Backend Functions
-**Test Case 1**: Test password hashing functionality.
-- **Function**: `hashPassword(password)`
-- **Steps**:
-  1. Provide a sample password.
-  2. Ensure the returned hash is not null and is a valid bcrypt hash.
-- **Expected Result**: The password is hashed correctly.
-
-**Test Case 2**: Test JWT token generation.
-- **Function**: `generateToken(userId)`
-- **Steps**:
-  1. Provide a valid user ID.
-  2. Ensure the returned token is valid and decodable.
-- **Expected Result**: The token contains the correct user ID.
-
-**Test Case 3**: Test S3 upload functionality.
+###  Backend Functions
+**Test Case 1**: Test S3 upload functionality.
 - **Function**: `uploadToS3(fileBuffer, userId)`
 - **Steps**:
   1. Mock AWS S3 instance to return a resolved promise with a URL.
@@ -122,7 +74,7 @@ This file contains test cases designed for the various components of the project
   3. Verify that the function returns the correct URL.
 - **Expected Result**: The function successfully returns the S3 URL.
 
-**Test Case 4**: Test error handling for failed S3 uploads.
+**Test Case 2**: Test error handling for failed S3 uploads.
 - **Function**: `uploadToS3(fileBuffer, userId)`
 - **Steps**:
   1. Mock AWS S3 instance to return a rejected promise.
