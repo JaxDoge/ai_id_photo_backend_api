@@ -4,13 +4,13 @@ import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { uploadToS3 } from '../utils/s3Upload.js';
 import multer from "multer";
+import nodemailer from "nodemailer";
+import {generatePasswordResetEmail} from "../utils/emailTemplate.js"
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const upload = multer();
-
 
 // register a new user
 router.post("/signup", async (req, res) => {
@@ -171,18 +171,21 @@ router.post("/google-signin", async (req, res) => {
 //   res.json({ success: true, token });
 // });
 
-
 // Get user's photo history
 router.get("/get-photo-history", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     return res.status(200).json({ success: true, data: user.historyPhotos });
   } catch (error) {
     console.error("Error fetching photo history:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch photo history" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch photo history" });
   }
 });
 
@@ -191,13 +194,17 @@ router.get("/get-single-photo", authMiddleware, async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.user.userId });
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     const photo = user.historyPhotos.find(
       (photo) => photo._id.toString() === req.query.photoId
     );
     if (!photo) {
-      return res.status(404).json({ success: false, message: "Photo not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Photo not found" });
     }
     return res.status(200).json({ success: true, data: photo });
   } catch (error) {
@@ -206,18 +213,20 @@ router.get("/get-single-photo", authMiddleware, async (req, res) => {
   }
 });
 
-
-
 // Update user details
 router.put("/update", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
     const updates = req.body;
 
-    const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, {
+      new: true,
+    });
 
     if (!updatedUser) {
-      return res.status(404).send({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .send({ success: false, message: "User not found" });
     }
 
     res.send({ success: true, data: updatedUser });
@@ -227,6 +236,105 @@ router.put("/update", authMiddleware, async (req, res) => {
   }
 });
 
+// Forgot password
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
 
+  try {
+    // Check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ error: "User with this email does not exist" });
+    }
+
+    // Generate a password reset token
+    const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    // Update user record with reset token
+    user.resetToken = resetToken;
+    user.resetTokenExpiration = Date.now() + 3600000; // 1 hour in milliseconds
+    await user.save();
+
+    // Send the reset link via email
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const resetLink = `${process.env.CLIENT_URL}/resetPassword?token=${resetToken}`;
+    
+    const mailOptions = {
+      to: email,
+      from: process.env.EMAIL,
+      subject: "Password Reset Request From AI ID PHOTO Generator",
+      html: generatePasswordResetEmail(resetLink),
+    };
+
+    // const mailOptions = {
+    //   from: process.env.EMAIL,
+    //   to: "recipient@example.com",
+    //   subject: "Test Email",
+    //   html: "<p>This is a test email.</p>",
+    // };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error("Error sending email:", err);
+      } else {
+        console.log("Email sent successfully:", info.response);
+      }
+    });
+
+    res.status(200).json({ message: "Password reset email sent successfully" });
+  } catch (error) {
+    console.error("Error in forgot password:", error);
+    if (error.response) {
+      console.error("Error response:", error.response);
+    }
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Reset passowrd
+router.post("/reset-password", async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Find the user based on the token
+    const user = await User.findOne({
+      _id: decoded.id,
+      resetToken: token,
+      resetTokenExpiration: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
+
+    // Update the user's password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    // Clear the resetToken and expiration to prevent reuse
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Error in reset password:", error);
+    res.status(400).json({ error: "Invalid or expired token" });
+  }
+});
 
 export default router;

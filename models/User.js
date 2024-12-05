@@ -51,9 +51,10 @@ const userSchema = new Schema(
       ],
       default: [],
     },
+    resetToken: { type: String },
+    resetTokenExpiration: { type: Date },
   },
   { timestamps: true }
 );
 
 export default model("User", userSchema);
-
