@@ -85,12 +85,7 @@ router.post("/signin", async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     res.status(200).json({
-      message: "2FA code sent successfully!",
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.firstName,
-      },
+      message: "2FA code sent successfully!"
     });
   } catch (error) {
     console.error("Error during sign-in:", error);
