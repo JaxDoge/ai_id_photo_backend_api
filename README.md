@@ -43,6 +43,7 @@ npm install node-fetch@2
 ```
 
 1. Setup for DB Testing
-```
+
+```bash
 npm install --save-dev jest
 ```
