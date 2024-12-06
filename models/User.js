@@ -53,6 +53,8 @@ const userSchema = new Schema(
     },
     resetToken: { type: String },
     resetTokenExpiration: { type: Date },
+    twoFactorCode: { type: String },
+    twoFactorExpiration: { type: Date },
   },
   { timestamps: true }
 );
