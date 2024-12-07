@@ -219,24 +219,33 @@ router.get("/get-single-photo", authMiddleware, async (req, res) => {
   }
 });
 
-// Delete a single photo by ID
-router.delete("/delete-photo", authMiddleware, async (req, res) => {
+// Delete a single photo by URL
+router.delete("/delete-single-photo", authMiddleware, async (req, res) => {
+  console.log("Request URL:", req.query.url);
   try {
     const user = await User.findOne({ _id: req.user.userId });
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
-    } else {
-      const photo = user.historyPhotos.find(
-        (photo) => photo._id.toString() === req.query.photoId
-      );
-      if (!photo) {
-        return res.status(404).json({ success: false, message: "Photo not found" });
-      } else {
-        user.historyPhotos.id(photo._id).remove();
-        await user.save();
-        return res.status(200).json({ success: true, message: "Photo deleted successfully" });
-      }
     }
+
+    const { url } = req.query;
+    if (!url) {
+      return res.status(400).json({ success: false, message: "Photo URL is required" });
+    }
+
+    // Find the photo by URL
+    const photo = user.historyPhotos.find((photo) => photo.url === url);
+    if (!photo) {
+      return res.status(404).json({ success: false, message: "Photo not found" });
+    }
+
+    // Remove the photo by filtering it out
+    user.historyPhotos = user.historyPhotos.filter((photo) => photo.url !== url);
+
+    // Save updated user document
+    await user.save();
+
+    return res.status(200).json({ success: true, message: "Photo deleted successfully" });
   } catch (error) {
     console.error("Error deleting photo:", error);
     res.status(500).json({ success: false, message: "Failed to delete photo" });
