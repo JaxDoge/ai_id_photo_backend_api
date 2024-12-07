@@ -219,6 +219,30 @@ router.get("/get-single-photo", authMiddleware, async (req, res) => {
   }
 });
 
+// Delete a single photo by ID
+router.delete("/delete-photo", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.user.userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    } else {
+      const photo = user.historyPhotos.find(
+        (photo) => photo._id.toString() === req.query.photoId
+      );
+      if (!photo) {
+        return res.status(404).json({ success: false, message: "Photo not found" });
+      } else {
+        user.historyPhotos.id(photo._id).remove();
+        await user.save();
+        return res.status(200).json({ success: true, message: "Photo deleted successfully" });
+      }
+    }
+  } catch (error) {
+    console.error("Error deleting photo:", error);
+    res.status(500).json({ success: false, message: "Failed to delete photo" });
+  }
+});
+
 // Update user details
 router.put("/update", authMiddleware, async (req, res) => {
   try {
